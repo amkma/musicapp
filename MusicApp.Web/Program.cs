@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using MusicApp.Web.Data;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddMemoryCache();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));

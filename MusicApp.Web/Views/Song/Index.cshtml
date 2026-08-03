@@ -10,6 +10,10 @@
     var categoryId = ViewData["CategoryId"] as int?;
     var categories = ViewData["Categories"] as SelectList;
     var singersOnPage = ViewData["SingersOnPage"] as IEnumerable<Singer>;
+    var lastId = ViewData["LastId"] as int? ?? 0;
+    var firstId = ViewData["FirstId"] as int? ?? 0;
+
+    Func<int, string> fmt = n => n.ToString("N0");
 }
 
 <h1>Songs</h1>
@@ -30,6 +34,8 @@
         <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
     </div>
 </form>
+
+<p class="text-muted small">Total @fmt(Model.TotalCount) songs @fmt(Model.TotalPages) pages of @Model.PageSize. Page @(Model.PageIndex) (cached count, refreshed every 5 min).</p>
 
 <table class="table">
     <thead>
@@ -59,10 +65,13 @@
 
 <nav aria-label="Songs pagination">
     <ul class="pagination">
+        @* ponytail: keyset (seek) for Prev/Next; OFFSET for direct page-number jumps *@
         @if (Model.HasPreviousPage)
         {
             <li class="page-item">
-                <a class="page-link" asp-action="Index" asp-route-page="@(Model.PageIndex - 1)" asp-route-singerName="@singerName" asp-route-categoryId="@categoryId">Previous</a>
+                <a class="page-link" asp-action="Index" asp-route-seek="prev"
+                   asp-route-firstId="@firstId" asp-route-page="@(Model.PageIndex)"
+                   asp-route-singerName="@singerName" asp-route-categoryId="@categoryId">Previous</a>
             </li>
         }
         else
@@ -70,17 +79,32 @@
             <li class="page-item disabled"><span class="page-link">Previous</span></li>
         }
 
-        @for (int i = 1; i <= Model.TotalPages; i++)
+        @for (int i = 1; i <= Model.TotalPages && i <= 10; i++)
         {
             <li class="page-item @(i == Model.PageIndex ? "active" : "")">
-                <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-singerName="@singerName" asp-route-categoryId="@categoryId">@i</a>
+                <a class="page-link" asp-action="Index" asp-route-page="@i"
+                   asp-route-singerName="@singerName" asp-route-categoryId="@categoryId">@i</a>
+            </li>
+        }
+        @if (Model.TotalPages > 10)
+        {
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            if (Model.PageIndex > 10 && Model.PageIndex < Model.TotalPages)
+            {
+                <li class="page-item active"><span class="page-link">@Model.PageIndex</span></li>
+            }
+            <li class="page-item @(Model.TotalPages == Model.PageIndex ? "active" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@Model.TotalPages"
+                   asp-route-singerName="@singerName" asp-route-categoryId="@categoryId">@Model.TotalPages</a>
             </li>
         }
 
         @if (Model.HasNextPage)
         {
             <li class="page-item">
-                <a class="page-link" asp-action="Index" asp-route-page="@(Model.PageIndex + 1)" asp-route-singerName="@singerName" asp-route-categoryId="@categoryId">Next</a>
+                <a class="page-link" asp-action="Index" asp-route-seek="next"
+                   asp-route-lastId="@lastId" asp-route-page="@(Model.PageIndex)"
+                   asp-route-singerName="@singerName" asp-route-categoryId="@categoryId">Next</a>
             </li>
         }
         else
