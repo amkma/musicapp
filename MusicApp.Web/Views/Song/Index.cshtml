@@ -1,4 +1,4 @@
-@model IEnumerable<MusicApp.Web.Models.Song>
+@model PaginatedList<MusicApp.Web.Models.Song>
 
 @{
     ViewData["Title"] = "Songs";
@@ -30,13 +30,13 @@
 <table class="table">
     <thead>
         <tr>
-            <th>@Html.DisplayNameFor(m => m.First().Title)</th>
-            <th>@Html.DisplayNameFor(m => m.First().Singer)</th>
-            <th>@Html.DisplayNameFor(m => m.First().Category)</th>
+            <th>@Html.DisplayNameFor(m => m.Items.First().Title)</th>
+            <th>@Html.DisplayNameFor(m => m.Items.First().Singer)</th>
+            <th>@Html.DisplayNameFor(m => m.Items.First().Category)</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.Items)
         {
             <tr>
                 <td>@Html.DisplayFor(_ => item.Title)</td>
@@ -46,3 +46,36 @@
         }
     </tbody>
 </table>
+
+<nav aria-label="Songs pagination">
+    <ul class="pagination">
+        @if (Model.HasPreviousPage)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-action="Index" asp-route-page="@(Model.PageIndex - 1)" asp-route-singerName="@singerName" asp-route-categoryId="@categoryId">Previous</a>
+            </li>
+        }
+        else
+        {
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+        }
+
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-singerName="@singerName" asp-route-categoryId="@categoryId">@i</a>
+            </li>
+        }
+
+        @if (Model.HasNextPage)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-action="Index" asp-route-page="@(Model.PageIndex + 1)" asp-route-singerName="@singerName" asp-route-categoryId="@categoryId">Next</a>
+            </li>
+        }
+        else
+        {
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+        }
+    </ul>
+</nav>
