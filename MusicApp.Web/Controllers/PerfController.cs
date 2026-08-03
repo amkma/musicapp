@@ -87,7 +87,8 @@ public class PerfController : Controller
         }
 
         sw.Stop();
-        TempData["SeedMs"] = sw.ElapsedMilliseconds;
+        // ponytail: cast long ms to int for TempData cookie serializer limitation
+        TempData["SeedMs"] = (int)sw.ElapsedMilliseconds;
         TempData["SeedRows"] = rowsToInsert;
         return RedirectToAction(nameof(Index));
     }

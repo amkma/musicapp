@@ -6,11 +6,10 @@
     var categories = ViewBag.Categories as int? ?? 0;
     var target = ViewBag.TargetRows as int? ?? 0;
 
-    var seedMs = TempData["SeedMs"] as long?;
+    var seedMs = TempData["SeedMs"] as int?;
     var seedRows = TempData["SeedRows"] as int?;
 
     Func<int, string> fmt = n => n.ToString("N0");
-    Func<long, string> fmtL = n => n.ToString("N0");
     Func<double, string> fmtD = n => n.ToString("N0");
 }
 
@@ -25,11 +24,11 @@
 
 @if (seedMs is not null && seedRows is not null)
 {
-    var ms = (long)seedMs;
+    var ms = (int)seedMs;
     var rows = (int)seedRows;
     var rps = ms == 0 ? 0 : rows * 1000.0 / ms;
     <div class="alert alert-success">
-        Inserted @fmt(rows) songs in @fmtL(ms) ms (@fmtD(rps) rows/sec).
+        Inserted @fmt(rows) songs in @fmt(ms) ms (@fmtD(rps) rows/sec).
     </div>
 }
 
