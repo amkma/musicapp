@@ -1,0 +1,49 @@
+@{
+    ViewData["Title"] = "Performance testing";
+
+    var currentSongs = ViewBag.CurrentSongs as int? ?? 0;
+    var singers = ViewBag.Singers as int? ?? 0;
+    var categories = ViewBag.Categories as int? ?? 0;
+    var target = ViewBag.TargetRows as int? ?? 0;
+
+    var seedMs = TempData["SeedMs"] as long?;
+    var seedRows = TempData["SeedRows"] as int?;
+}
+
+<h1>Performance testing</h1>
+
+<div class="alert alert-info">
+    <strong>Target:</strong> @target:N0 records.
+    Songs currently: <strong>@currentSongs:N0</strong> /
+    Singers: @singers /
+    Categories: @categories
+</div>
+
+@if (seedMs is not null && seedRows is not null)
+{
+    <div class="alert alert-success">
+        Inserted @((int)seedRows):N0 songs in @((long)seedMs):N0 ms
+        (@(((long)seedMs == 0 ? 0 : (double)(int)seedRows * 1000 / (long)seedMs)):N0 rows/sec).
+    </div>
+}
+
+@if (currentSongs < target)
+{
+    <form asp-action="Seed" method="post">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-warning"
+                onclick="return confirm('This generates @(target - currentSongs):N0 songs. Can take tens of seconds. Continue?');">
+            Generate @(target - currentSongs):N0 records
+        </button>
+    </form>
+}
+else
+{
+    <div class="alert alert-secondary">
+        Target reached. Test filtering and pagination on the Songs page.
+    </div>
+}
+
+<p class="mt-3">
+    <a asp-controller="Song" asp-action="Index" class="btn btn-outline-primary">Go to Songs</a>
+</p>
