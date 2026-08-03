@@ -8,32 +8,39 @@
 
     var seedMs = TempData["SeedMs"] as long?;
     var seedRows = TempData["SeedRows"] as int?;
+
+    Func<int, string> fmt = n => n.ToString("N0");
+    Func<long, string> fmtL = n => n.ToString("N0");
+    Func<double, string> fmtD = n => n.ToString("N0");
 }
 
 <h1>Performance testing</h1>
 
 <div class="alert alert-info">
-    <strong>Target:</strong> @target:N0 records.
-    Songs currently: <strong>@currentSongs:N0</strong> /
+    <strong>Target:</strong> @fmt(target) records.
+    Songs currently: <strong>@fmt(currentSongs)</strong> /
     Singers: @singers /
     Categories: @categories
 </div>
 
 @if (seedMs is not null && seedRows is not null)
 {
+    var ms = (long)seedMs;
+    var rows = (int)seedRows;
+    var rps = ms == 0 ? 0 : rows * 1000.0 / ms;
     <div class="alert alert-success">
-        Inserted @((int)seedRows):N0 songs in @((long)seedMs):N0 ms
-        (@(((long)seedMs == 0 ? 0 : (double)(int)seedRows * 1000 / (long)seedMs)):N0 rows/sec).
+        Inserted @fmt(rows) songs in @fmtL(ms) ms (@fmtD(rps) rows/sec).
     </div>
 }
 
 @if (currentSongs < target)
 {
+    var remaining = target - currentSongs;
     <form asp-action="Seed" method="post">
         @Html.AntiForgeryToken()
         <button type="submit" class="btn btn-warning"
-                onclick="return confirm('This generates @(target - currentSongs):N0 songs. Can take tens of seconds. Continue?');">
-            Generate @(target - currentSongs):N0 records
+                onclick='return confirm("This generates @fmt(remaining) songs. Can take tens of seconds. Continue?");'>
+            Generate @fmt(remaining) records
         </button>
     </form>
 }

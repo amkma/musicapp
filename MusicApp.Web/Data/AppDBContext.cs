@@ -28,6 +28,11 @@ public class AppDbContext : DbContext
             .HasForeignKey(s => s.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // ponytail: index FK columns + title for filter/pagination over 2M rows
+        modelBuilder.Entity<Song>().HasIndex(s => s.SingerId);
+        modelBuilder.Entity<Song>().HasIndex(s => s.CategoryId);
+        modelBuilder.Entity<Song>().HasIndex(s => s.Title);
+
         // ponytail: seed with fixed Ids so FK relationships hold
         modelBuilder.Entity<Category>().HasData(
             new Category { Id = 1, Name = "Pop" },
