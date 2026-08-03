@@ -1,11 +1,15 @@
 @model PaginatedList<MusicApp.Web.Models.Song>
 
+@using MusicApp.Web.Models
+@using MusicApp.Web.Helpers
+
 @{
     ViewData["Title"] = "Songs";
 
     var singerName = ViewData["SingerName"] as string;
     var categoryId = ViewData["CategoryId"] as int?;
     var categories = ViewData["Categories"] as SelectList;
+    var singersOnPage = ViewData["SingersOnPage"] as IEnumerable<Singer>;
 }
 
 <h1>Songs</h1>
@@ -40,7 +44,13 @@
         {
             <tr>
                 <td>@Html.DisplayFor(_ => item.Title)</td>
-                <td>@Html.DisplayFor(_ => item.Singer.Name)</td>
+                <td>
+                    @* ponytail: pure Bootstrap modal trigger via data-bs-*, zero custom JS *@
+                    <button type="button" class="btn btn-link p-0 align-baseline"
+                            data-bs-toggle="modal" data-bs-target="#singerModal@(item.Singer.Id)">
+                        @item.Singer.Name
+                    </button>
+                </td>
                 <td>@Html.DisplayFor(_ => item.Category.Name)</td>
             </tr>
         }
@@ -79,3 +89,9 @@
         }
     </ul>
 </nav>
+
+@* Modal instances for each distinct singer on the current page *@
+@foreach (var s in singersOnPage ?? Enumerable.Empty<Singer>())
+{
+    @await Html.PartialAsync("_SingerModal", s)
+}

@@ -26,6 +26,7 @@ public class SongController : Controller
 
         IQueryable<Song> query = _context.Songs
             .Include(s => s.Singer)
+                .ThenInclude(s => s.Songs)
             .Include(s => s.Category)
             .AsNoTracking();
 
@@ -39,6 +40,13 @@ public class SongController : Controller
         int pageIndex = page is null or < 1 ? 1 : page.Value;
 
         var paged = await PaginatedList<Song>.CreateAsync(query, pageIndex, PageSize);
+
+        // ponytail: distinct singers on the current page feed the modal partial
+        ViewBag.SingersOnPage = paged.Items
+            .Select(s => s.Singer)
+            .GroupBy(s => s.Id)
+            .Select(g => g.First())
+            .ToList();
 
         return View(paged);
     }
