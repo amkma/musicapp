@@ -26,7 +26,6 @@ public class SongController : Controller
 
         IQueryable<Song> query = _context.Songs
             .Include(s => s.Singer)
-                .ThenInclude(s => s.Songs)
             .Include(s => s.Category)
             .AsNoTracking();
 
