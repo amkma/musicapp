@@ -37,7 +37,8 @@
 
 <p class="text-muted small">Total @fmt(Model.TotalCount) songs @fmt(Model.TotalPages) pages of @Model.PageSize. Page @(Model.PageIndex) (cached count, refreshed every 5 min).</p>
 
-<table class="table">
+<div class="data-scroll-panel">
+<table class="table mb-0">
     <thead>
         <tr>
             <th>@Html.DisplayNameFor(m => m.Items.First().Title)</th>
@@ -62,6 +63,7 @@
         }
     </tbody>
 </table>
+</div>
 
 <nav aria-label="Songs pagination">
     <ul class="pagination">

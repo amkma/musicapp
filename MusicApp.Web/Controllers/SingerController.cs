@@ -1,19 +1,31 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MusicApp.Web.Data;
+using MusicApp.Web.Helpers;
 using MusicApp.Web.Models;
 
 namespace MusicApp.Web.Controllers;
 
 public class SingerController : Controller
 {
+    private const int PageSize = 100;
     private readonly AppDbContext _context;
 
     public SingerController(AppDbContext context) => _context = context;
 
     // GET: Singer
-    public async Task<IActionResult> Index() =>
-        View(await _context.Singers.ToListAsync());
+    public async Task<IActionResult> Index(int page = 1)
+    {
+        int pageIndex = page < 1 ? 1 : page;
+
+        var paged = await PaginatedList<Singer>.CreateAsync(
+            _context.Singers.AsNoTracking(),
+            s => s.Id,
+            pageIndex,
+            PageSize);
+
+        return View(paged);
+    }
 
     // GET: Singer/Details/5
     public async Task<IActionResult> Details(int? id)

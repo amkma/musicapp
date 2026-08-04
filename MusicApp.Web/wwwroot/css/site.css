@@ -21,6 +21,25 @@ body {
   margin-bottom: 60px;
 }
 
+.data-scroll-panel {
+  max-height: min(65vh, 720px);
+  overflow-y: auto;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.5rem;
+  background: var(--bs-body-bg);
+}
+
+.data-scroll-panel .table {
+  margin-bottom: 0;
+}
+
+.data-scroll-panel thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bs-body-bg);
+}
+
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
   text-align: end;

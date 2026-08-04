@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace MusicApp.Web.Models;
+namespace MusicApp.Domain.Entities;
 
 public class Song
 {

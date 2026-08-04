@@ -1,3 +1,5 @@
 <Solution>
+  <Project Path="MusicApp.Application/MusicApp.Application.csproj" />
+  <Project Path="MusicApp.Domain/MusicApp.Domain.csproj" />
   <Project Path="MusicApp.Web/MusicApp.Web.csproj" />
 </Solution>
