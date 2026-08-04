@@ -1,13 +1,12 @@
 @{
     ViewData["Title"] = "Performance testing";
 
-    var currentSongs = ViewBag.CurrentSongs as int? ?? 0;
-    var singers = ViewBag.Singers as int? ?? 0;
-    var categories = ViewBag.Categories as int? ?? 0;
     var target = ViewBag.TargetRows as int? ?? 0;
+    var currentSongs = ViewBag.CurrentSongs as int? ?? 0;
 
     var seedMs = TempData["SeedMs"] as int?;
     var seedRows = TempData["SeedRows"] as int?;
+    var seedError = TempData["SeedError"] as string;
 
     Func<int, string> fmt = n => n.ToString("N0");
     Func<double, string> fmtD = n => n.ToString("N0");
@@ -17,12 +16,14 @@
 
 <div class="alert alert-info">
     <strong>Target:</strong> @fmt(target) records.
-    Songs currently: <strong>@fmt(currentSongs)</strong> /
-    Singers: @singers /
-    Categories: @categories
+    Songs currently: <strong>@fmt(currentSongs)</strong>
 </div>
 
-@if (seedMs is not null && seedRows is not null)
+@if (seedError is not null)
+{
+    <div class="alert alert-warning">@seedError</div>
+}
+else if (seedMs is not null && seedRows is not null)
 {
     var ms = (int)seedMs;
     var rows = (int)seedRows;

@@ -1,25 +1,21 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MusicApp.Web.Data;
+using MusicApp.Application.Songs;
+using MusicApp.Application.Seed;
 
 namespace MusicApp.Web.Controllers;
 
-public class PerfController : Controller
+public class PerfController(GeneratePerfSongsHandler seeder, GetSongsHandler songsHandler) : Controller
 {
     private const int TargetRows = 2_000_000;
-    private const int BatchSize = 5000;
-
-    private readonly AppDbContext _context;
-
-    public PerfController(AppDbContext context) => _context = context;
 
     // GET: /Perf
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(CancellationToken ct)
     {
-        ViewBag.CurrentSongs = await _context.Songs.AsNoTracking().CountAsync();
-        ViewBag.Singers = await _context.Singers.AsNoTracking().CountAsync();
-        ViewBag.Categories = await _context.Categories.AsNoTracking().CountAsync();
+        // ponytail: counts via handler paths so Web stays free of DbContext
+        var page = await songsHandler.HandleAsync(new GetSongsQuery(null, null, 1, null, null, null), ct);
+        ViewBag.CurrentSongs = page.TotalCount;
+
+        // counts are derived from page metadata handlers already produce
         ViewBag.TargetRows = TargetRows;
         return View();
     }
@@ -27,69 +23,20 @@ public class PerfController : Controller
     // POST: /Perf/Seed
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Seed()
+    public async Task<IActionResult> Seed(CancellationToken ct)
     {
-        var existing = await _context.Songs.AsNoTracking().CountAsync();
-        if (existing >= TargetRows)
+        var (inserted, elapsedMs, error) = await seeder.HandleAsync(ct);
+
+        if (error is not null)
         {
-            ViewBag.Message = $"Skipped: Songs table already has {existing:N0} rows (target {TargetRows:N0}).";
-            return RedirectToAction(nameof(Index));
+            TempData["SeedError"] = error;
+        }
+        else
+        {
+            TempData["SeedMs"] = elapsedMs;
+            TempData["SeedRows"] = inserted;
         }
 
-        var singerIds = await _context.Singers.AsNoTracking()
-            .Select(s => s.Id).ToListAsync();
-        var categoryIds = await _context.Categories.AsNoTracking()
-            .Select(c => c.Id).ToListAsync();
-
-        if (singerIds.Count == 0 || categoryIds.Count == 0)
-        {
-            ViewBag.Message = "Cannot seed: no Singers or Categories found. Apply migrations and seed first.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        int rowsToInsert = TargetRows - existing;
-        int batches = (int)Math.Ceiling(rowsToInsert / (double)BatchSize);
-
-        var sw = Stopwatch.StartNew();
-
-        // ponytail: disable change tracking for bulk insert, restore after
-        _context.ChangeTracker.AutoDetectChangesEnabled = false;
-
-        try
-        {
-            var rand = new Random(42);
-            int songId = existing + 1;
-
-            for (int b = 0; b < batches; b++)
-            {
-                int take = Math.Min(BatchSize, rowsToInsert - b * BatchSize);
-                var buffer = new List<Models.Song>(take);
-
-                for (int i = 0; i < take; i++)
-                {
-                    buffer.Add(new Models.Song
-                    {
-                        Title = $"Perf Song {songId}",
-                        SingerId = singerIds[songId % singerIds.Count],
-                        CategoryId = categoryIds[songId % categoryIds.Count]
-                    });
-                    songId++;
-                }
-
-                await _context.Songs.AddRangeAsync(buffer);
-                await _context.SaveChangesAsync();
-                _context.ChangeTracker.Clear();
-            }
-        }
-        finally
-        {
-            _context.ChangeTracker.AutoDetectChangesEnabled = true;
-        }
-
-        sw.Stop();
-        // ponytail: cast long ms to int for TempData cookie serializer limitation
-        TempData["SeedMs"] = (int)sw.ElapsedMilliseconds;
-        TempData["SeedRows"] = rowsToInsert;
         return RedirectToAction(nameof(Index));
     }
 }

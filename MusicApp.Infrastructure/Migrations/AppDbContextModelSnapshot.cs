@@ -2,20 +2,17 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using MusicApp.Web.Data;
+using MusicApp.Infrastructure.Persistence;
 
 #nullable disable
 
 namespace MusicApp.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260803223026_IndexSongsForPerf")]
-    partial class IndexSongsForPerf
+    partial class AppDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

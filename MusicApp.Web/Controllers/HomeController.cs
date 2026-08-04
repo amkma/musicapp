@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using MusicApp.Web.Models;
+using MusicApp.Web.ViewModels;
 
 namespace MusicApp.Web.Controllers;
 
